@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.10.0)
+project(xengine VERSION 0.1.0 LANGUAGES C CXX)
+
+
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+
+add_executable(xengine
+src/main.cpp 
+src/engine/core/game.cpp
+src/engine/core/time.cpp)
+# 指定目标的头文件目录
+target_include_directories(xengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+
+
+
+target_link_libraries(xengine PRIVATE  
+${CMAKE_CURRENT_SOURCE_DIR}/lib/hv.lib 
+${CMAKE_CURRENT_SOURCE_DIR}/lib/hv_static.lib
+${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL3_mixer.lib
+${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL3_image.lib
+${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL3_ttf.lib
+${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL3.lib
+)
