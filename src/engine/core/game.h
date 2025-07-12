@@ -3,6 +3,13 @@
 struct SDL_Window;
 struct SDL_Renderer;
 
+namespace engine::resource{
+    class ResourceManager;
+}
+namespace engine::render{
+    class Camera;
+    class Renderer;
+}
 
 namespace engine::core{
 class Time;
@@ -17,6 +24,9 @@ bool is_running=true;
 
 
 std::unique_ptr<engine::core::Time> time_;
+std::unique_ptr<engine::resource::ResourceManager> resource_manager_;
+std::unique_ptr<engine::render::Camera> camera_;
+std::unique_ptr<engine::render::Renderer> renderer_;
 
 
 public:
@@ -39,5 +49,11 @@ private:
 [[nodiscard]] bool initSDL();
 
 [[nodiscard]] bool initTime();
+[[nodiscard]] bool initResourceManager();
+[[nodiscard]] bool initCamera();
+[[nodiscard]] bool initRenderer();
+
+void resourceManagerTest();
+void rendererTest();
 };
 }

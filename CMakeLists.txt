@@ -10,7 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(xengine
 src/main.cpp 
 src/engine/core/game.cpp
-src/engine/core/time.cpp)
+src/engine/core/time.cpp
+src/engine/resource/texture_manager.cpp
+src/engine/resource/font_manager.cpp
+src/engine/resource/audio_manager.cpp
+src/engine/resource/resource_manager.cpp
+src/engine/render/camera.cpp
+src/engine/render/renderer.cpp
+
+)
 # 指定目标的头文件目录
 target_include_directories(xengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
