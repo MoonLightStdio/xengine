@@ -17,6 +17,7 @@ public:
     Renderer(SDL_Renderer *sdl_render, engine::resource::ResourceManager *resource_manager);
     void drawSprite(Camera *camera, Sprite *sprite, glm::vec2 position, glm::vec2 scale={1.0f,1.0f} , double angle=0.0f);
     void drawUISprite(Sprite *sprite, glm::vec2 position, glm::vec2 scale={1.0f,1.0f} , double angle=0.0f);
+    void drawParallax(Camera *camera, Sprite *sprite, glm::vec2 position,glm::bvec2 repeat,glm::vec2 scroll_factor, glm::vec2 scale={1.0f,1.0f});
     void present();
 
     SDL_Renderer *getSDLRenderer() const;

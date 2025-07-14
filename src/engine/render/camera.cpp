@@ -44,4 +44,8 @@ glm::vec2 Camera::getScreenPosition(glm::vec2 world_position)
 {
     return world_position-position_;
 }
+glm::vec2 Camera::getParallaxPosition(glm::vec2 world_position, glm::vec2 scroll_factor)
+{
+    return world_position-position_*scroll_factor;
+}
 }

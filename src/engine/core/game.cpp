@@ -48,18 +48,40 @@ void Game::run()
     resourceManagerTest();
     while(is_running){
         float dt=time_->tick();
-        update(dt);
+        spdlog::info("dt:{},",dt);
         handleEvent();
+        update(dt);
         renderer();
     }
 
 }
 
 void Game::update(float dt_){
+auto keys = SDL_GetKeyboardState(nullptr);
+    glm::vec2 camera_pos=camera_->getPosition();
+    if( keys[SDL_SCANCODE_ESCAPE] ){
+        is_running=false;
+    }
+    if(keys[SDL_SCANCODE_D]){
 
+       camera_pos.x+= speed_*dt_;
+    }
+    if(keys[SDL_SCANCODE_A]){
+       camera_pos.x-= speed_*dt_;
+    }
+    if(keys[SDL_SCANCODE_W]){
+       camera_pos.y-= speed_*dt_;
+
+    }
+    if(keys[SDL_SCANCODE_S]){
+       camera_pos.y+= speed_*dt_;
+
+    }
+    camera_->setPosition(camera_pos);
 }
 void Game::handleEvent(){
 
+    
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if( event.type == SDL_EVENT_QUIT){
@@ -150,7 +172,14 @@ void Game::resourceManagerTest()
 }
 void Game::rendererTest()
 {
+    static float rotation = 0.0f;
+    rotation += 0.01f;
     engine::render::Sprite sprite_world("assets/textures/Actors/frog.png");
-    renderer_->drawSprite(camera_.get(), &sprite_world, glm::vec2(200, 200), glm::vec2(1.0f, 1.0f), 0.0f);
+    engine::render::Sprite sprite_ui("assets/textures/UI/credits-text.png");
+    engine::render::Sprite sprite_parallax("assets/textures/Layers/back.png");
+
+    renderer_->drawParallax( camera_.get(),&sprite_parallax, glm::vec2(100,100),glm::vec2(1.0f, 1.0f),glm::vec2(0.5f, 0.5f));
+    renderer_->drawSprite(camera_.get(), &sprite_world, glm::vec2(200, 200), glm::vec2(1.0f, 1.0f), rotation);
+    renderer_->drawUISprite(&sprite_ui, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f), 0.0f);
 }
 }

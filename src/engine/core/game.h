@@ -16,6 +16,7 @@ class Time;
 
 class Game{
 private:
+float speed_=100;
 int FPS_; //每秒帧率
 float delay_time_; //帧延迟
 SDL_Window* window_;

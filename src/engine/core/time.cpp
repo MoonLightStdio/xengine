@@ -13,6 +13,7 @@ void Time::setFps(int fps)
 {
     fps_=fps;
     dt_=1000000000/fps;
+    spdlog::info("dt_:{}",dt_);
 }
 float Time::tick()
 {
@@ -22,13 +23,13 @@ float Time::tick()
         
         //spdlog::trace("帧率：{}",fps_);
         start_time_=end_time_;
-        return dt_;
+        return 1/fps_;
         
     }else{
         float tmp=1000000000/(end_time_-start_time_);
         //spdlog::trace("帧率：{}",tmp);
         start_time_=end_time_;
-        return tmp;
+        return 1/tmp;
 
     }
 
