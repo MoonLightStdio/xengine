@@ -12,6 +12,10 @@
 #include "../render/renderer.h"
 #include "../utils/math.h"
 #include "time.h"
+#include "config.h"
+#include "../input/input_manager.h"
+#include "../object/game_object.h"
+#include "../component/component.h"
 
 namespace engine::core{
     Game::Game()
@@ -24,12 +28,14 @@ namespace engine::core{
 
 bool Game::init(){
     spdlog::trace("初始化SDL...");
+    if(!initConfig()) return false;
     if(!initSDL()) return false;
     if(!initTime()) return false;
     if(!initResourceManager()) return false;
     if(!initCamera()) return false;
     if(!initRenderer()) return false;
-
+    if(!initInputManager()) return false;
+    testGameObject();
 
 
     spdlog::trace("初始化SDL成功...");
@@ -38,17 +44,19 @@ bool Game::init(){
 
 void Game::run()
 {
-    FPS_=144;
-    is_running=true;
     if(!init()){
         spdlog::warn("SDL init()失败...");
     }
+    FPS_=config_->target_fps_;
+    is_running=true;
+
     time_->setFps(FPS_);
 
     resourceManagerTest();
     while(is_running){
         float dt=time_->tick();
-        spdlog::info("dt:{},",dt);
+       // spdlog::info("dt:{},",dt);
+       input_manager_->update();
         handleEvent();
         update(dt);
         renderer();
@@ -56,38 +64,26 @@ void Game::run()
 
 }
 
-void Game::update(float dt_){
-auto keys = SDL_GetKeyboardState(nullptr);
-    glm::vec2 camera_pos=camera_->getPosition();
-    if( keys[SDL_SCANCODE_ESCAPE] ){
-        is_running=false;
-    }
-    if(keys[SDL_SCANCODE_D]){
+void Game::update(float dt_)
+{
 
-       camera_pos.x+= speed_*dt_;
-    }
-    if(keys[SDL_SCANCODE_A]){
-       camera_pos.x-= speed_*dt_;
-    }
-    if(keys[SDL_SCANCODE_W]){
-       camera_pos.y-= speed_*dt_;
-
-    }
-    if(keys[SDL_SCANCODE_S]){
-       camera_pos.y+= speed_*dt_;
-
-    }
-    camera_->setPosition(camera_pos);
+    testCamera();
 }
 void Game::handleEvent(){
-
-    
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if( event.type == SDL_EVENT_QUIT){
+    SDL_Event e;
+    if(SDL_PollEvent(&e)){
+        if(e.type==SDL_EVENT_QUIT){
+            spdlog::trace("收到退出事件。");
             is_running=false;
         }
     }
+  if (input_manager_->shouldQuit()) {
+        spdlog::trace("GameApp 收到来自 InputManager 的退出请求。");
+        is_running = false;
+        return;
+    }
+
+    testInputManager();
 }
 void Game::renderer(){
     SDL_RenderClear(render_);
@@ -101,7 +97,7 @@ bool Game::initSDL()
         return false;
     }
 
-    window_ = SDL_CreateWindow("SunnyLand", 1280, 720, SDL_WINDOW_RESIZABLE);
+    window_ = SDL_CreateWindow(config_->window_title_.c_str(), config_->window_width_, config_->window_height_,config_->window_resizable_? SDL_WINDOW_RESIZABLE:NULL);
     if (window_ == nullptr) {
         spdlog::error("无法创建窗口! SDL错误: {}", SDL_GetError());
         return false;
@@ -112,13 +108,28 @@ bool Game::initSDL()
         spdlog::error("无法创建渲染器! SDL错误: {}", SDL_GetError());
         return false;
     }
-
+// 设置 VSync (注意: VSync 开启时，驱动程序会尝试将帧率限制到显示器刷新率，有可能会覆盖我们手动设置的 target_fps)
+    int vsync_mode = config_->vsync_enabled_ ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED;
+    SDL_SetRenderVSync(render_, vsync_mode);
+    spdlog::trace("VSync 设置为: {}", config_->vsync_enabled_ ? "Enabled" : "Disabled");
     // 设置逻辑分辨率
-    SDL_SetRenderLogicalPresentation(render_, 640, 360, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderLogicalPresentation(render_,  config_->window_width_/2, config_->window_height_/2,SDL_LOGICAL_PRESENTATION_LETTERBOX);
     spdlog::trace("SDL 初始化成功。");
     return true;
 }
-bool Game::initTime(){
+bool Game::initConfig()
+{
+    try{
+        config_=std::make_unique<Config>("assets/config.json");
+    }catch(std::exception& e){
+        spdlog::error("初始化配置失败: {}",e.what());
+        return false;
+    }
+    spdlog::trace("config初始化配置成功。");
+    return true;
+}
+bool Game::initTime()
+{
     try{
     time_=std::make_unique<Time>();
     }catch(std::exception& e){
@@ -159,6 +170,57 @@ bool Game::initRenderer()
     }
     spdlog::trace("初始化渲染器成功。");
     return true;
+}
+bool Game::initInputManager()
+{
+    try {
+        input_manager_ = std::make_unique<engine::input::InputManager>(render_, config_.get());
+    } catch (const std::exception& e) {
+        spdlog::error("初始化输入管理器失败: {}", e.what());
+        return false;
+    }
+    spdlog::trace("输入管理器初始化成功。");
+    return true;
+}
+void Game::testCamera()
+{
+    auto key_state = SDL_GetKeyboardState(nullptr);
+    if (key_state[SDL_SCANCODE_UP]) camera_->move(glm::vec2(0, -1));   
+    if (key_state[SDL_SCANCODE_DOWN]) camera_->move(glm::vec2(0, 1));
+    if (key_state[SDL_SCANCODE_LEFT]) camera_->move(glm::vec2(-1, 0));
+    if (key_state[SDL_SCANCODE_RIGHT]) camera_->move(glm::vec2(1, 0));
+}
+void Game::testGameObject()
+{
+    engine::object::GameObject player("game_object");
+    player.addComponent<engine::component::Component>();
+}
+void Game::testInputManager()
+{
+    std::vector<std::string> actions = {
+        "move_up",
+        "move_down",
+        "move_left",
+        "move_right",
+        "jump",
+        "attack",
+        "pause",
+        "MouseLeftClick",
+        "MouseRightClick"
+    };
+    auto key_state = SDL_GetKeyboardState(nullptr);
+    if (key_state[SDL_SCANCODE_ESCAPE]) is_running = false;
+    for (const auto& action : actions) {
+        if (input_manager_->isActionPressed(action)) {
+            spdlog::info(" {} 按下 ", action);
+        }
+        if (input_manager_->isActionReleased(action)) {
+            spdlog::info(" {} 抬起 ", action);
+        }
+        if (input_manager_->isActionDown(action)) {
+            spdlog::info(" {} 按下中 ", action);
+        }
+    }
 }
 void Game::resourceManagerTest()
 {

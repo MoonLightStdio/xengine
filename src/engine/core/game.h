@@ -10,10 +10,13 @@ namespace engine::render{
     class Camera;
     class Renderer;
 }
+namespace engine::input{
+    class InputManager;
+}
 
 namespace engine::core{
 class Time;
-
+class Config; //配置文件
 class Game{
 private:
 float speed_=100;
@@ -28,6 +31,8 @@ std::unique_ptr<engine::core::Time> time_;
 std::unique_ptr<engine::resource::ResourceManager> resource_manager_;
 std::unique_ptr<engine::render::Camera> camera_;
 std::unique_ptr<engine::render::Renderer> renderer_;
+std::unique_ptr<engine::core::Config> config_;
+std::unique_ptr<engine::input::InputManager> input_manager_;
 
 
 public:
@@ -48,13 +53,19 @@ void handleEvent();
 void renderer();
 private:
 [[nodiscard]] bool initSDL();
-
+[[nodiscard]] bool initConfig();
 [[nodiscard]] bool initTime();
 [[nodiscard]] bool initResourceManager();
 [[nodiscard]] bool initCamera();
 [[nodiscard]] bool initRenderer();
+[[nodiscard]] bool initInputManager();
 
 void resourceManagerTest();
 void rendererTest();
+void testInputManager();
+void testCamera();
+void testGameObject();
+
+
 };
 }

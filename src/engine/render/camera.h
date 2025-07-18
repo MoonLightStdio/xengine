@@ -10,6 +10,7 @@ glm::vec2 viewpoint_size_= glm::vec2(0, 0);
 std::optional<engine::utils::Rect> limit_bounds_;
 public:
     Camera(glm::vec2 viewpoint_size,glm::vec2 position={0.0f,0.0f}, std::optional<engine::utils::Rect> limit_bounds=std::nullopt);
+    void move(const glm::vec2& offset);                                     ///< @brief 移动相机
 
     glm::vec2 getPosition() const;
     void setPosition(glm::vec2 position) ;

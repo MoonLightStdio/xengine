@@ -9,6 +9,11 @@ Camera::Camera( glm::vec2 viewpoint_size, glm::vec2 position,std::optional<engin
     this->limit_bounds_ = limit_bounds;
 }
 
+void Camera::move(const glm::vec2 &offset)
+{
+    position_+=offset;
+}
+
 glm::vec2 Camera::getPosition() const
 {
     return position_;
