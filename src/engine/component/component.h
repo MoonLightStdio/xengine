@@ -4,6 +4,10 @@ namespace engine::object{
     class GameObject;  //生命game游戏类
 }
 
+namespace engine::core{
+    class Context;  //生命上下文类
+}
+
 namespace engine::component{
     class Component{
         friend class engine::object::GameObject;
@@ -30,11 +34,11 @@ public:
     }
 
 protected:
-    //设置为保护函数只有方便子类调用
-    virtual void init(){}
-    virtual void update(float delta_time){}
-    virtual void handleInput(){}
-    virtual void render(){}
-    virtual void clean() {}
+   // 关键循环函数，全部设为保护，只有 GameObject 需要（可以）调用
+    virtual void init() {}                      ///< @brief 保留两段初始化的机制，GameObject 添加组件时自动调用，不需要外部调用
+    virtual void handleInput(engine::core::Context&) {}                 ///< @brief 处理输入
+    virtual void update(float, engine::core::Context&) = 0;             ///< @brief 更新，必须实现
+    virtual void render(engine::core::Context&) {}                      ///< @brief 渲染
+    virtual void clean() {}                                             ///< @brief 清理
     };
 }  //namespace engine::component

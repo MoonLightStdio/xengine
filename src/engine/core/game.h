@@ -17,6 +17,8 @@ namespace engine::input{
 namespace engine::core{
 class Time;
 class Config; //配置文件
+class Context;
+
 class Game{
 private:
 float speed_=100;
@@ -33,6 +35,8 @@ std::unique_ptr<engine::render::Camera> camera_;
 std::unique_ptr<engine::render::Renderer> renderer_;
 std::unique_ptr<engine::core::Config> config_;
 std::unique_ptr<engine::input::InputManager> input_manager_;
+std::unique_ptr<engine::core::Context> context_;
+
 
 
 public:
@@ -59,6 +63,7 @@ private:
 [[nodiscard]] bool initCamera();
 [[nodiscard]] bool initRenderer();
 [[nodiscard]] bool initInputManager();
+[[nodiscard]] bool initContext();
 
 void resourceManagerTest();
 void rendererTest();

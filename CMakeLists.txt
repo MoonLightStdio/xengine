@@ -20,6 +20,9 @@ src/engine/render/renderer.cpp
 src/engine/core/config.cpp
 src/engine/input/input_manager.cpp
 src/engine/object/game_object.cpp
+src/engine/core/context.cpp
+src/engine/component/sprite_component.cpp
+src/engine/component/transform_component.cpp
 
 )
 # 指定目标的头文件目录

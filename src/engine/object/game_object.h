@@ -48,6 +48,8 @@ public:
         }
         auto new_component = std::make_unique<T>(std::forward<Args>(args)...);
         T *ptr = new_component.get();
+        ptr->setOwner(this);
+        ptr->init();
         components_[type_index] = std::move(new_component);
         spdlog::debug("Add component {} to GameObject {}", typeid(T).name(), name_);
         return ptr;
@@ -79,9 +81,9 @@ public:
             components_.erase(it);
         }
     }
-    void update(float delta_time);
-    void render();
+    void handleInput(engine::core::Context&) ;                ///< @brief 处理输入
+    void update(float, engine::core::Context&)    ;     ///< @brief 更新，必须实现
+    void render(engine::core::Context&);                  ///< @brief 渲染
     void clean();
-    void handleInput();
 };
 }

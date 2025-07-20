@@ -16,8 +16,12 @@
 #include "../input/input_manager.h"
 #include "../object/game_object.h"
 #include "../component/component.h"
-
+#include "context.h"
+#include "../component/sprite_component.h"
+#include "../component/transform_component.h"
 namespace engine::core{
+
+engine::object::GameObject game_object("Test_game_object");
     Game::Game()
     {
     }
@@ -35,7 +39,7 @@ bool Game::init(){
     if(!initCamera()) return false;
     if(!initRenderer()) return false;
     if(!initInputManager()) return false;
-    testGameObject();
+    if(!initContext()) return false;
 
 
     spdlog::trace("初始化SDL成功...");
@@ -53,6 +57,8 @@ void Game::run()
     time_->setFps(FPS_);
 
     resourceManagerTest();
+    testGameObject();
+
     while(is_running){
         float dt=time_->tick();
        // spdlog::info("dt:{},",dt);
@@ -88,6 +94,7 @@ void Game::handleEvent(){
 void Game::renderer(){
     SDL_RenderClear(render_);
     rendererTest();
+    game_object.render(*context_);
     SDL_RenderPresent(render_);
 }
 bool Game::initSDL()
@@ -182,18 +189,34 @@ bool Game::initInputManager()
     spdlog::trace("输入管理器初始化成功。");
     return true;
 }
+bool Game::initContext()
+{
+    try{
+        context_ = std::make_unique<engine::core::Context>(*input_manager_,  *camera_, *renderer_,*resource_manager_);
+    }catch(const std::exception& e){
+        spdlog::error("初始化上下文失败: {}",e.what());
+        return false;
+
+    }
+    return true;
+}
 void Game::testCamera()
 {
     auto key_state = SDL_GetKeyboardState(nullptr);
-    if (key_state[SDL_SCANCODE_UP]) camera_->move(glm::vec2(0, -1));   
+    if (key_state[SDL_SCANCODE_UP]) {
+        camera_->move(glm::vec2(0, -1));   
+        spdlog::info("camera move up, camera_.position: {},{}",camera_->getPosition().x,camera_->getPosition().y);
+    }
     if (key_state[SDL_SCANCODE_DOWN]) camera_->move(glm::vec2(0, 1));
     if (key_state[SDL_SCANCODE_LEFT]) camera_->move(glm::vec2(-1, 0));
     if (key_state[SDL_SCANCODE_RIGHT]) camera_->move(glm::vec2(1, 0));
 }
 void Game::testGameObject()
 {
-    engine::object::GameObject player("game_object");
-    player.addComponent<engine::component::Component>();
+    game_object.addComponent<engine::component::TransformComponent>(glm::vec2(100, 100));
+    game_object.addComponent<engine::component::SpriteComponent>("assets/textures/Props/big-crate.png", *resource_manager_, engine::utils::Alignment::CENTER);
+    game_object.getComponent<engine::component::TransformComponent>()->setScale(glm::vec2(2.0f,2.0f));
+    game_object.getComponent<engine::component::TransformComponent>()->setRotation(45.0f);
 }
 void Game::testInputManager()
 {
@@ -212,13 +235,13 @@ void Game::testInputManager()
     if (key_state[SDL_SCANCODE_ESCAPE]) is_running = false;
     for (const auto& action : actions) {
         if (input_manager_->isActionPressed(action)) {
-            spdlog::info(" {} 按下 ", action);
+           // spdlog::info(" {} 按下 ", action);
         }
         if (input_manager_->isActionReleased(action)) {
-            spdlog::info(" {} 抬起 ", action);
+          //  spdlog::info(" {} 抬起 ", action);
         }
         if (input_manager_->isActionDown(action)) {
-            spdlog::info(" {} 按下中 ", action);
+          //  spdlog::info(" {} 按下中 ", action);
         }
     }
 }

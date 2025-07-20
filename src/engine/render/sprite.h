@@ -3,7 +3,13 @@
 #include "SDL3/SDL_rect.h"
 #include <string>
 namespace engine::render {
-/// @brief 存储是否翻转、texture_id,原矩形
+/*
+@brief 存储是否翻转、texture_id,原矩形
+获取精灵图
+@param texture_id 纹理路径
+@param rect 想要截取的纹理的矩形
+@param is_filp 是否翻转
+*/ 
 class Sprite {
 private:
     std::optional<SDL_FRect> rect_;
