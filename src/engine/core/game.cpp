@@ -19,6 +19,8 @@
 #include "context.h"
 #include "../component/sprite_component.h"
 #include "../component/transform_component.h"
+#include "../scene/scene_manager.h"
+#include "../../game/scene/game_scene.h"
 namespace engine::core{
 
 engine::object::GameObject game_object("Test_game_object");
@@ -40,9 +42,14 @@ bool Game::init(){
     if(!initRenderer()) return false;
     if(!initInputManager()) return false;
     if(!initContext()) return false;
+    if(!initSceneManager()) return false;
 
+    // 创建第一个场景并压入栈
+    auto scene = std::make_unique<game::scene::GameScene>("GameScene", *context_, *scene_manager_);
+    scene_manager_->requestPushScene(std::move(scene));
 
-    spdlog::trace("初始化SDL成功...");
+    is_running = true;
+    spdlog::trace("GameApp 初始化成功。");
     return true;
 }
 
@@ -56,8 +63,6 @@ void Game::run()
 
     time_->setFps(FPS_);
 
-    resourceManagerTest();
-    testGameObject();
 
     while(is_running){
         float dt=time_->tick();
@@ -72,29 +77,21 @@ void Game::run()
 
 void Game::update(float dt_)
 {
-
-    testCamera();
+    scene_manager_->update(dt_);
 }
 void Game::handleEvent(){
-    SDL_Event e;
-    if(SDL_PollEvent(&e)){
-        if(e.type==SDL_EVENT_QUIT){
-            spdlog::trace("收到退出事件。");
-            is_running=false;
-        }
-    }
-  if (input_manager_->shouldQuit()) {
+    if (input_manager_->shouldQuit()) {
         spdlog::trace("GameApp 收到来自 InputManager 的退出请求。");
         is_running = false;
         return;
     }
 
-    testInputManager();
+    scene_manager_->handleInput();
+
 }
 void Game::renderer(){
     SDL_RenderClear(render_);
-    rendererTest();
-    game_object.render(*context_);
+    scene_manager_->render();
     SDL_RenderPresent(render_);
 }
 bool Game::initSDL()
@@ -200,6 +197,17 @@ bool Game::initContext()
     }
     return true;
 }
+bool Game::initSceneManager()
+{
+    try{
+        scene_manager_ = std::make_unique<engine::scene::SceneManager>(*context_);
+    }catch(const std::exception& e){
+        spdlog::error("初始化场景管理器失败: {}",e.what());
+        return false;
+    }
+    return true;
+}
+/*
 void Game::testCamera()
 {
     auto key_state = SDL_GetKeyboardState(nullptr);
@@ -267,4 +275,5 @@ void Game::rendererTest()
     renderer_->drawSprite(camera_.get(), &sprite_world, glm::vec2(200, 200), glm::vec2(1.0f, 1.0f), rotation);
     renderer_->drawUISprite(&sprite_ui, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f), 0.0f);
 }
+*/
 }

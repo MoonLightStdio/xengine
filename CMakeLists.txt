@@ -23,7 +23,9 @@ src/engine/object/game_object.cpp
 src/engine/core/context.cpp
 src/engine/component/sprite_component.cpp
 src/engine/component/transform_component.cpp
-
+src/game/scene/game_scene.cpp
+src/engine/scene/scene_manager.cpp
+src/engine/scene/scene.cpp
 )
 # 指定目标的头文件目录
 target_include_directories(xengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

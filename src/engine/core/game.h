@@ -14,6 +14,10 @@ namespace engine::input{
     class InputManager;
 }
 
+namespace engine::scene{
+    class SceneManager;
+}
+
 namespace engine::core{
 class Time;
 class Config; //配置文件
@@ -36,6 +40,7 @@ std::unique_ptr<engine::render::Renderer> renderer_;
 std::unique_ptr<engine::core::Config> config_;
 std::unique_ptr<engine::input::InputManager> input_manager_;
 std::unique_ptr<engine::core::Context> context_;
+std::unique_ptr<engine::scene::SceneManager> scene_manager_;
 
 
 
@@ -64,12 +69,9 @@ private:
 [[nodiscard]] bool initRenderer();
 [[nodiscard]] bool initInputManager();
 [[nodiscard]] bool initContext();
+[[nodiscard]] bool initSceneManager();
 
-void resourceManagerTest();
-void rendererTest();
-void testInputManager();
-void testCamera();
-void testGameObject();
+
 
 
 };
